@@ -44,7 +44,7 @@ function LnLInitializeTool(id, xml, name, group)
         transformations = {}
     }
 
-    RegisterTool(tool.id or 'lnl_tool', tool.name or ('LNL : Line ' .. AutoGetCurrentLine()), 'vox/tool/sledge.vox', tool.group or 6)
+    RegisterTool(tool.id or 'lnl_tool', tool.name or ('LNL : Line ' .. AutoGetCurrentLine(1)), 'vox/tool/sledge.vox', tool.group or 6)
     SetBool(tool.lnl.path .. '.enabled', true)
     SetString(tool.lnl.path .. '.lnl', '')
 
@@ -133,7 +133,9 @@ function LnLGetBoneLocalTransform(tool, id)
 
 	for o = 1, #order do
 		local bid = table.concat(order, '.', 1, o)
-		transform = TransformToParentTransform(transform, tool.lnl.rig.bones[bid].local_transform)
+        local bone = tool.lnl.rig.bones[bid]
+        if not bone then error(string.format('LNL : Bone not found, searched for [%s], given id [%s]', AutoToString(bid), AutoToString(id))) end
+		transform = TransformToParentTransform(transform, bone.local_transform)
 
 		local add = tool.lnl.rig.transformations[bid]
 		if add then
@@ -199,7 +201,7 @@ function LnLSetTransformation(tool, id, transformation)
 end
 
 ---@param tool lnl_tool
----@param regenerate boolean
+---@param regenerate boolean?
 function LnLApplyRig(tool, regenerate)
     local player_tool_body = GetToolBody()
 
