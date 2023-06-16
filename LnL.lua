@@ -12,15 +12,6 @@ local getTransformTable = {
 	vehicle = GetVehicleTransform,
 }
 
-local function TagTable(handle)
-    local T = {}
-    for _, t in pairs(ListTags(handle)) do
-        T[t] = GetTagValue(handle, t)
-    end
-
-    return T
-end
-
 ---@class lnl_tool: { id: string, xml: string, name: string, group: integer, lnl: { path: string, rig: { bones:table<string, table>, shapes:table<string, table<integer, table>>, transformations:table<string, table> } }}
 
 
@@ -47,6 +38,7 @@ function LnLInitializeTool(id, xml, name, group)
     RegisterTool(tool.id or 'lnl_tool', tool.name or ('LNL : Line ' .. AutoGetCurrentLine(1)), 'vox/tool/sledge.vox', tool.group or 6)
     SetBool(tool.lnl.path .. '.enabled', true)
     SetString(tool.lnl.path .. '.lnl', '')
+    SetInt(tool.lnl.path .. '.ammo', 9999)
 
 	AutoDeleteHandles(LnLSpawnTool(tool))
 	
@@ -67,14 +59,14 @@ function LnLSpawnTool(tool)
         local handle_type = GetEntityType(ent)
 
         data.handle = ent
-        data.tags = TagTable(data.handle)
+        data.tags = AutoTags(data.handle)
 
         -- Gets the transform from the spawn origin of the weapon
         data.transform = TransformToLocalTransform(origin, getTransformTable[handle_type](data.handle))
 
         if handle_type == "shape" then
             local body = GetShapeBody(data.handle)
-            local body_tags = TagTable(body)
+            local body_tags = AutoTags(body)
 
             local shape_parent = tool.lnl.rig.shapes[body_tags.id]
             shape_parent[#shape_parent + 1] = data
@@ -174,25 +166,6 @@ function LnLGetShapesOfBone(tool, id)
     return AutoTableSub(tool.lnl.rig.shapes[id], 'handle')
 end
 
--- function LnLAddShapeToBone(tool, id, shape, force_local_transform)
---     local data = {}
-
---     data.handle = shape
---     data.tags = TagTable(data.handle)
---     data.remove_data_on_switch =
-
---     if force_local_transform then
---         data.local_transform = TransformCopy(force_local_transform)
---     else
---         data.local_transform = TransformToLocalTransform(LnLGetBoneWorldTransform(tool, id), GetShapeWorldTransform(shape))
---     end
-
---     SetShapeBody(shape, GetToolBody(), data.local_transform)
-    
---     local shape_parent = tool.lnl.rig.shapes[id]
---     shape_parent[#shape_parent + 1] = data
--- end
-
 ---@param tool lnl_tool
 ---@param id string
 ---@param transformation transform
@@ -240,6 +213,11 @@ function LnLApplyRig(tool, regenerate)
     end
 end
 
+---@param shapes shape_handle[]
+---@param body body_handle
+---@param transform transform
+---@return shape_handle[] colliders
+---@return shape_handle[] visuals
 function LnLFakeScaledPhysics(shapes, body, transform)
     visuals = {}
     colliders = {}
@@ -306,7 +284,7 @@ function LnLDropTool(disable, can_pickup)
     local new_body
     if can_pickup then
         local xml = string.format(
-        '<script file="ammo.lua" param0="%s" param1="%s" param2="%s"><body tags="ammo"/></script>', 'amount=0',
+            '<script file="ammo.lua" param0="%s" param1="%s" param2="%s"><body tags="ammo"/></script>', 'amount=0',
             'tool=' .. tool_id, 'remain=false')
         new_body = Spawn(xml, altered_tool_transform, false, false)[2]
     else
@@ -343,7 +321,12 @@ function LnLDropTool(disable, can_pickup)
     return new_body, colliders, visuals
 end
 
-function LnLCreateBodyFromBone(Tool, id)
+---@param tool lnl_tool
+---@param id string
+---@return body_handle generated_body
+---@return shape_handle[] colliders
+---@return shape_handle[] visuals
+function LnLCreateBodyFromBone(tool, id)
     local tool_body = GetToolBody()
 
     local tool_transform = GetBodyTransform(tool_body)
@@ -352,7 +335,7 @@ function LnLCreateBodyFromBone(Tool, id)
 
     local new_body = Spawn('<body/>', altered_tool_transform, false, false)[1]
 
-    local visuals, colliders = LnLFakeScaledPhysics(LnLGetShapesOfBone(Tool, id), new_body, altered_tool_transform)
+    local visuals, colliders = LnLFakeScaledPhysics(LnLGetShapesOfBone(tool, id), new_body, altered_tool_transform)
 
     return new_body, colliders, visuals
 end
