@@ -272,6 +272,7 @@ end
 ---@return body_handle generated_body
 ---@return shape_handle[] colliders
 ---@return shape_handle[] visuals
+---@return string tool_id
 function LnLDropTool(disable, can_pickup)
     local tool_id = GetString('game.player.tool')
     local tool_body = GetToolBody()
@@ -290,6 +291,8 @@ function LnLDropTool(disable, can_pickup)
     else
         new_body = Spawn('<body/>', altered_tool_transform, false, false)[1]
     end
+
+    SetTag(new_body, 'tool_id ', tool_id)
 
     local visuals, colliders = LnLFakeScaledPhysics(tool_shapes, new_body, altered_tool_transform)
 
@@ -318,7 +321,7 @@ function LnLDropTool(disable, can_pickup)
         SetString('game.player.tool', next_tool)
     end
 
-    return new_body, colliders, visuals
+    return new_body, colliders, visuals, tool_id
 end
 
 ---@param tool lnl_tool
