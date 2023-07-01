@@ -216,9 +216,10 @@ end
 ---@param shapes shape_handle[]
 ---@param body body_handle
 ---@param transform transform
+---@param density number
 ---@return shape_handle[] colliders
 ---@return shape_handle[] visuals
-function LnLFakeScaledPhysics(shapes, body, transform)
+function LnLFakeScaledPhysics(shapes, body, transform, density)
     visuals = {}
     colliders = {}
     
@@ -246,7 +247,13 @@ function LnLFakeScaledPhysics(shapes, body, transform)
                 local new_size = AutoVecCeil(VecScale(shape_world_size, 10))
                 local offset = VecScale(new_size, -0.1)
                 local centered_transform = AutoTransformOffset(new_transform, VecAdd(shape_world_size, offset))
-                local collider_shape = CreateShape(body, Transform(), s)
+
+                -- local collider_shape = CreateShape(body, Transform(), s)
+
+                local xml = ('<vox file="tool/sledge.vox" density="%s"/>'):format(density or 1)
+                local collider_shape = Spawn(xml, Transform(), true, true)[1]
+                SetShapeBody(collider_shape, body, Transform())
+
 
                 ResizeShape(collider_shape, 0, 0, 0, new_size[1] - 1, new_size[2] - 1, new_size[3] - 1)
                 SetBrush('cube', -1, 1)
@@ -269,11 +276,12 @@ end
 ---Creates a Dropping Tool Effect by cloning the weapon's shapes into a new body, and creating fake colliders for them.
 ---@param disable boolean
 ---@param can_pickup boolean
+---@param density number
 ---@return body_handle generated_body
 ---@return shape_handle[] colliders
 ---@return shape_handle[] visuals
 ---@return string tool_id
-function LnLDropTool(disable, can_pickup)
+function LnLDropTool(disable, can_pickup, density)
     local tool_id = GetString('game.player.tool')
     local tool_body = GetToolBody()
     local tool_shapes = GetBodyShapes(tool_body)
@@ -294,7 +302,7 @@ function LnLDropTool(disable, can_pickup)
 
     SetTag(new_body, 'tool_id ', tool_id)
 
-    local visuals, colliders = LnLFakeScaledPhysics(tool_shapes, new_body, altered_tool_transform)
+    local visuals, colliders = LnLFakeScaledPhysics(tool_shapes, new_body, altered_tool_transform, density)
 
     if disable then
         SetBool(string.format('game.tool.%s.enabled', tool_id), false)
