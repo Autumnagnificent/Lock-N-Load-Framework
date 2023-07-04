@@ -15,10 +15,10 @@ local getTransformTable = {
 ---@class lnl_tool: { id: string, xml: string, name: string, group: integer, lnl: { path: string, rig: { bones:table<string, table>, shapes:table<string, table<integer, table>>, transformations:table<string, table> } }}
 
 
----@param id string
----@param xml string
----@param name string
----@param group integer
+---@param id  string
+---@param xml  string
+---@param name  string
+---@param group  integer
 ---@return lnl_tool
 function LnLInitializeTool(id, xml, name, group)
     local tool = {}
@@ -234,7 +234,7 @@ function LnLFakeScaledPhysics(shapes, body, transform, density)
             local shape_world_size = VecScale(shape_local_size, scale)
 
             do -- Scaled Shape Clone - Visual
-                local xml = ('<vox file="tool/sledge.vox" scale="%s"/>'):format(scale * 10)
+                local xml = ('<vox file="tool/wire.vox" scale="%s"/>'):format(scale * 10)
                 local visual_shape = Spawn(xml, Transform(), true, true)[1]
 
                 CopyShapePalette(s, visual_shape)
@@ -251,7 +251,7 @@ function LnLFakeScaledPhysics(shapes, body, transform, density)
 
                 -- local collider_shape = CreateShape(body, Transform(), s)
 
-                local xml = ('<vox file="tool/sledge.vox" density="%s"/>'):format(density or 1)
+                local xml = ('<vox file="tool/wire.vox" density="%s"/>'):format(density or 1)
                 local collider_shape = Spawn(xml, Transform(), true, true)[1]
                 SetShapeBody(collider_shape, body, Transform())
 
