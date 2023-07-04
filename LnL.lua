@@ -32,7 +32,7 @@ function LnLInitializeTool(id, xml, name, group)
     tool.lnl.rig = {
         bones = {},
         shapes = {},
-        transformations = {}
+        transformations = {},
     }
 
     RegisterTool(tool.id or 'lnl_tool', tool.name or ('LNL : Line ' .. AutoGetCurrentLine(1)), 'vox/tool/sledge.vox', tool.group or 6)
@@ -107,9 +107,10 @@ end
 ---@param tool lnl_tool
 ---@return boolean selected
 ---@return boolean canusetool
+---@return string current_tool
 function LnLSelected(tool)
     local player_selected_tool = GetString('game.player.tool')
-    return player_selected_tool == tool.id, GetBool('game.player.canusetool')
+    return player_selected_tool == tool.id, GetBool('game.player.canusetool'), player_selected_tool
 end
 
 -- function LnLWantingToGrab()
@@ -243,7 +244,7 @@ function LnLFakeScaledPhysics(shapes, body, transform, density)
                 visuals[#visuals + 1] = visual_shape
             end
 
-            do -- Nonscaled Shape - Collider
+            if not HasTag(s, 'ignore_collider') then -- Nonscaled Shape - Collider
                 local new_size = AutoVecCeil(VecScale(shape_world_size, 10))
                 local offset = VecScale(new_size, -0.1)
                 local centered_transform = AutoTransformOffset(new_transform, VecAdd(shape_world_size, offset))
