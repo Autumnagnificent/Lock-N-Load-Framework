@@ -39,6 +39,7 @@ function LnLInitializeTool(id, xml, name, group)
     SetBool(tool.lnl.path .. '.enabled', true)
     SetString(tool.lnl.path .. '.lnl', '')
     SetInt(tool.lnl.path .. '.ammo', 9999)
+    SetInt(tool.lnl.path .. '.group', group)
 
 	AutoDeleteHandles(LnLSpawnTool(tool))
 	
@@ -209,8 +210,6 @@ function LnLApplyRig(tool, regenerate)
                 end
             end
         end
-
-        SetToolTransform(Transform(), 0)
     end
 end
 
@@ -350,4 +349,11 @@ function LnLCreateBodyFromBone(tool, id)
     local visuals, colliders = LnLFakeScaledPhysics(LnLGetShapesOfBone(tool, id), new_body, altered_tool_transform)
 
     return new_body, colliders, visuals
+end
+
+function LnLFOVToolTransformOffset(transform, multi)
+    local t = AutoMap(GetFloat('options.gfx.fov'), 60, 120, -0.25, 0.25)
+    local new = TransformCopy(transform)
+    new.pos[3] = new.pos[3] - t * (multi or 1)
+    return new
 end
