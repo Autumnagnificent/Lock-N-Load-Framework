@@ -85,7 +85,7 @@ function LnLSpawnTool(tool)
         if last_id and tool.lnl.rig.bones[last_id] then
             bone.local_transform = TransformToLocalTransform(tool.lnl.rig.bones[last_id].transform, bone.transform)
         else
-            bone.local_transform = Transform()
+            bone.local_transform = TransformCopy(bone.transform)
         end
 
         tool.lnl.rig.bones[id] = bone
