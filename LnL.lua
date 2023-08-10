@@ -233,7 +233,7 @@ function LnLFakeScaledPhysics(shapes, body, transform, density)
             local shape_world_size = VecScale(shape_local_size, scale)
 
             do -- Scaled Shape Clone - Visual
-                local xml = ('<vox file="tool/wire.vox" scale="%s"/>'):format(scale * 10)
+                local xml = ('<vox file="tool/wire.vox" collide="false" density="0" scale="%s"/>'):format(scale * 10)
                 local visual_shape = Spawn(xml, Transform(), true, true)[1]
 
                 CopyShapePalette(s, visual_shape)
@@ -302,7 +302,7 @@ function LnLDropTool(disable, can_pickup, density)
 
     SetTag(new_body, 'tool_id ', tool_id)
 
-    local visuals, colliders = LnLFakeScaledPhysics(tool_shapes, new_body, altered_tool_transform, density)
+    local colliders, visuals = LnLFakeScaledPhysics(tool_shapes, new_body, altered_tool_transform, density)
 
     if disable then
         SetBool(string.format('game.tool.%s.enabled', tool_id), false)
