@@ -60,14 +60,14 @@ function LnLSpawnTool(tool)
         local handle_type = GetEntityType(ent)
 
         data.handle = ent
-        data.tags = AutoTags(data.handle)
+        data.tags = AutoGetTags(data.handle)
 
         -- Gets the transform from the spawn origin of the weapon
         data.transform = TransformToLocalTransform(origin, getTransformTable[handle_type](data.handle))
 
         if handle_type == "shape" then
             local body = GetShapeBody(data.handle)
-            local body_tags = AutoTags(body)
+            local body_tags = AutoGetTags(body)
 
             local shape_parent = tool.lnl.rig.shapes[body_tags.id]
             shape_parent[#shape_parent + 1] = data
